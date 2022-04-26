@@ -6,6 +6,6 @@ outputs: a list of the candidate names in order from most votes to least
 If 2 candidates get the same number of votes the candidate that got to that number first should win.
 
 ## Run it
-Originally developed on,
-JDK: [AdoptOpenJDK](https://adoptopenjdk.net/archive.html) 11.0.11
+Originally developed on,  
+JDK: [AdoptOpenJDK](https://adoptopenjdk.net/archive.html) 11.0.11  
 Maven: 3.8.1

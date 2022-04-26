@@ -1,48 +1,36 @@
 class Main {
-//    data class Vote(
-//        val first: String,
-//        val second: String,
-//        val third: String
-//    )
 
-    val VOTE_OFFSET = 3
-
-    private fun transformVotesToResults(voteCount: Map<String, Int>, totalVotes: Map<Int, List<String>>): List<String> = voteCount.toList()
-        .sortedByDescending { it.second }
-        .filter { it.first.isNotEmpty() }
-        .map { it.first }
-
-//
-//    [
-//       100, B, C
-//        99, A,
-//    ]
+    private fun transformVotesToResults(totalVotes: Map<Int, List<String>>): List<String> = totalVotes
+        .toSortedMap(compareByDescending { votesCount -> votesCount })
+        .map { (_, candidates) -> candidates }
+        .flatten()
 
     fun voteCount(votes: List<List<String>>): List<String> {
+        val voteOffset = 3
         val count = mutableMapOf<String, Int>()
-        val totalVotes = mutableMapOf<Int, MutableList<String>>() // TODO: refactor to only use this
+        val totalVotes = mutableMapOf<Int, MutableList<String>>()
 
         votes.forEach { vote ->
             vote.forEachIndexed { index, candidate ->
-                val voteWeight = VOTE_OFFSET - index
-                // TODO: Cleaner implementation, less branch option?
-                if (count.containsKey(candidate)) {
-                    count[candidate] = count[candidate]!!.plus(voteWeight)
-                } else {
-                    count.putIfAbsent(candidate, voteWeight)
-                }
+                if (candidate.isEmpty()) return@forEachIndexed
 
-                val candidateCurrentCount = count[candidate]!!
+                val previousCount = count.getOrDefault(candidate, 0)
+                val currentCount = previousCount + voteOffset - index
+                count[candidate] = currentCount
 
-                if (totalVotes.containsKey(candidateCurrentCount)) {
-                    totalVotes[candidateCurrentCount]!!.add(candidate)
-                } else {
-                    totalVotes[candidateCurrentCount] = mutableListOf(candidate)
+                totalVotes[currentCount]?.add(candidate) ?: totalVotes.put(
+                    currentCount,
+                    mutableListOf(candidate)
+                )
+
+                when (totalVotes[previousCount]?.size) {
+                    1 -> totalVotes.remove(previousCount)
+                    else -> totalVotes[previousCount]?.remove(candidate)
                 }
             }
         }
 
-        return transformVotesToResults(count, totalVotes)
+        return transformVotesToResults(totalVotes)
     }
 
     companion object {
